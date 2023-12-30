@@ -1,0 +1,45 @@
+name: deploy-book
+
+# Only run this when the master branch changes
+on:
+  push:
+    branches:
+    - main
+    # If your git repository has the Jupyter Book within some-subfolder next to
+    # unrelated files, you can make this run only if a file within that specific
+    # folder has been modified.
+    #
+    # paths:
+    # - some-subfolder/**
+
+# This job installs dependencies, builds the book, and pushes it to `gh-pages`
+jobs:
+  deploy-book:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    # Install dependencies
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    # Build the book
+    - name: Build the book
+      run: |
+        jupyter-book build .
+
+    # Push the book's HTML to github-pages
+    - name: Deploy
+      uses: crazy-max/ghaction-github-pages@v4
+      with:
+        target_branch: gh-pages
+        build_dir: ./_build/html
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
